@@ -1,21 +1,8 @@
 import WorkoutActions from "@/app/components/WorkoutActions";
 import Image from "next/image";
-
-type Workout = {
-  id: number;
-  name: string;
-  image: string;
-  muscleGroups: string[];
-  equipment: string;
-  difficulty: "Beginner" | "Intermediate" | "Advanced";
-  duration: number;
-  caloriesBurned: number;
-  sets: number;
-  reps: string;
-  rating: number;
-  description: string;
-  instructions: string[];
-};
+import { notFound } from "next/navigation";
+import type { Workout } from "@/data/workout";
+import { workouts as fallbackWorkouts } from "@/data/workout";
 
 type WorkoutPageProps = {
   params: Promise<{
@@ -28,15 +15,33 @@ export default async function WorkoutDetailsPage({
 }: WorkoutPageProps) {
   const { id } = await params;
 
-  const response = await fetch(
-    `https://api.abcz.workers.dev/api/fitlog/${id}`
-  );
+  let workout: Workout | undefined;
 
-  if (!response.ok) {
-    throw new Error("Failed to fetch workout");
+  try {
+    const response = await fetch(
+      `https://api.abcz.workers.dev/api/fitlog/${id}`,
+      {
+        cache: "force-cache",
+        next: { revalidate: 60 },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch workout: ${response.status}`);
+    }
+
+    workout = await response.json();
+  } catch (error) {
+    // If the free API is rate-limited or briefly down, fall back to the
+    // local copy instead of crashing the whole page.
+    console.warn("Falling back to local workout data:", error);
+    workout = fallbackWorkouts.find((item) => item.id === Number(id));
   }
 
-  const workout: Workout = await response.json();
+  // Neither the API nor the local fallback had this id — show the real 404 page.
+  if (!workout) {
+    notFound();
+  }
 
   return (
     <main className="flex-1 px-6 py-10">

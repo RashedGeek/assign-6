@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { Workout } from "@/data/workout";
 import { useFitlog } from "@/context/FitlogContext";
+import { useToast } from "@/context/ToastContext";
 
 type WorkoutCardProps = {
   workout: Workout;
@@ -15,9 +16,9 @@ export default function WorkoutCard({
   const {
     planWorkouts,
     addToPlan,
-    removeFromPlan,
     planLimit,
   } = useFitlog();
+  const { showToast } = useToast();
 
   const inPlan = planWorkouts.some(
     (item) => item.id === workout.id
@@ -26,17 +27,15 @@ export default function WorkoutCard({
   const isPlanFull = !inPlan && planWorkouts.length >= planLimit;
 
   const handlePlan = () => {
-  if (inPlan) {
-    const confirmed = window.confirm(
-      `Remove "${workout.name}" from today's plan?`
-    );
-    if (!confirmed) return;
+    if (inPlan) {
+      // Already added — don't remove on a second click, just confirm it's there.
+      // Removing only happens deliberately, via the ✕ button on My Plan.
+      showToast(`"${workout.name}" is already in today's plan`);
+      return;
+    }
 
-    removeFromPlan(workout.id);
-  } else {
     addToPlan(workout);
-  }
-};
+  };
 
   return (
     <article className="group overflow-hidden rounded-2xl border border-base-300 bg-base-100 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
