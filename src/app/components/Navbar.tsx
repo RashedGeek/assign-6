@@ -11,18 +11,19 @@ export default function Navbar() {
   return (
     <nav className="sticky top-0 z-50 flex items-center justify-between border-b border-base-300 bg-base-100 px-6 py-4">
       {/* Left side: Logo + FITLOG */}
-      <div className="flex items-center gap-3">
-        <Image
-          src={logo}
-          alt="FitLog logo"
-          width={32}
-          height={32}
-        />
+      {/* Left side: Logo + FITLOG */}
+<Link href="/" className="flex items-center gap-3">
+  <Image
+    src={logo}
+    alt="FitLog logo"
+    width={32}
+    height={32}
+  />
 
-        <span className="text-xl font-bold tracking-wide">
-          FITLOG
-        </span>
-      </div>
+  <span className="text-xl font-bold tracking-wide">
+    FITLOG
+  </span>
+</Link>
 
       {/* Middle: Navigation */}
       <div className="flex gap-8">
