@@ -1,6 +1,7 @@
 "use client";
 
 import { useFitlog } from "@/context/FitlogContext";
+import { useToast } from "@/context/ToastContext";
 import type { Workout } from "@/data/workout";
 
 type WorkoutActionsProps = {
@@ -14,11 +15,10 @@ export default function WorkoutActions({
     planWorkouts,
     savedWorkouts,
     addToPlan,
-    removeFromPlan,
     saveForLater,
-    removeSaved,
     planLimit,
   } = useFitlog();
+  const { showToast } = useToast();
 
   const inPlan = planWorkouts.some(
     (item) => item.id === workout.id
@@ -32,18 +32,22 @@ export default function WorkoutActions({
 
   const handlePlan = () => {
     if (inPlan) {
-      removeFromPlan(workout.id);
-    } else {
-      addToPlan(workout);
+      showToast(`"${workout.name}" is already in today's plan`);
+      return;
     }
+
+    addToPlan(workout);
   };
 
   const handleSave = () => {
     if (saved) {
-      removeSaved(workout.id);
-    } else {
-      saveForLater(workout);
+      // Already saved — don't remove on a second click, just confirm it's there.
+      // Removing only happens deliberately, via the ✕ button on My Plan → Saved.
+      showToast(`"${workout.name}" is already saved`);
+      return;
     }
+
+    saveForLater(workout);
   };
 
   return (
