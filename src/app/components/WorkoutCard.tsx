@@ -26,12 +26,17 @@ export default function WorkoutCard({
   const isPlanFull = !inPlan && planWorkouts.length >= planLimit;
 
   const handlePlan = () => {
-    if (inPlan) {
-      removeFromPlan(workout.id);
-    } else {
-      addToPlan(workout);
-    }
-  };
+  if (inPlan) {
+    const confirmed = window.confirm(
+      `Remove "${workout.name}" from today's plan?`
+    );
+    if (!confirmed) return;
+
+    removeFromPlan(workout.id);
+  } else {
+    addToPlan(workout);
+  }
+};
 
   return (
     <article className="group overflow-hidden rounded-2xl border border-base-300 bg-base-100 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
